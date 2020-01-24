@@ -9,6 +9,39 @@ Tokens
 espaces = (' ' | 13 | 10)+;
 commentaire= '#' [[0 .. 0xffff] - [10 + 13]]* (10 | 13 | 10 13);
 
+parenthese_ouvrante = '(' ;
+parenthese_fermante = ')' ;
+accolade_ouvrante = '{';
+accolade_fermante = '}';
+
+egale = '=' ;
+et = '&' ;
+ou = '|' ;
+inferieur = '<';
+addition = '+' ;
+soustraction = '-' ;
+multiplication = '*' ;
+division = '/';
+mod = '%' ;
+non_logique = '!';
+
+virgule = ',';
+point_virgule = ';' ;
+
+si = 'si' ;
+alors = 'alors';
+sinon = 'sinon';
+
+tant_que_logique = 'tantque' ;
+faire = 'faire';
+
+type = 'entier';
+
+lecture = 'lire';
+ecrire = 'ecrire';
+
+chiffre = ['0' .. '9']+;
+
 Ignored Tokens
 
 espaces, commentaire;
@@ -16,4 +49,41 @@ espaces, commentaire;
 Productions
 
 programme = optdecvar listedecfonc ;
+
+expr =
+    {exp1} exp1 |
+    {ou} expr ou exp1 ;
+
+exp1 =
+    {exp2} exp2 |
+    {et} exp1 et exp2 ;
+exp2 =
+    {exp3} exp3 |
+    {egale} exp2 egale exp3 |
+    {inferieur} exp2 inferieur exp3;
+
+exp3 =
+    {exp4} exp4 |
+    {addition} exp3 addition exp4 |
+    {soustraction} exp3 soustraction exp4;
+
+exp4 =
+    {exp5} exp5 |
+    {multiplication} exp4 multiplication exp5 |
+    {division} exp4 division exp5 ;
+
+exp5 =
+    {exp6} exp6 |
+    {non_logique} non_logique parenthese_ouvrante exp6 perenthese_fermante ;
+
+exp6 =
+    {parenthese} parenthse_ouvrante expr parenthse_fermante |
+    {nombrer} nombre |
+    {apl_fonc} apl_fonc |
+    {variable} variable ;
+
+nombre =
+    {chiffres} chiffre nombre|
+    {chiffre} chiffre ;
+
 
