@@ -37,8 +37,10 @@ faire = 'faire';
 
 type = 'entier';
 
+fonction = 'fonction'
 lecture = 'lire';
 ecrire = 'ecrire';
+retourner = 'retourner';
 
 chiffre = ['0' .. '9']+;
 
@@ -98,13 +100,17 @@ nombre =
 instruction =
     {affect} affect |
     {if} if |
-    {while} while |
-    {return} return |
-    {apl_fonct} apl_fonct|
-    {write} write |
-    {read} read;
+    {while} tant_que_logique expr faire bloc_inst |
+    {return} retourner parenthese_ouvrante expr parenthese_fermante |
+    {apl_fonct} fonction parenthese_ouvrante list_expr parenthese_fermante|
+    {write} ecrire parenthese_ouvrante expr parenthese_fermante |
+    {read} read |
+    {block_instructions} accolade_ouvrante instruction block accolade_fermante ;
 if =
     {si} si expr alors bloc_inst|
     {si_sinon} si expr alors bloc_inst sinon bloc_inst ;
-while =
-    {tantque} tant_que_logique expr faire bloc_inst ;
+
+
+block =
+    {bloque} instruction block|
+    {vide};
