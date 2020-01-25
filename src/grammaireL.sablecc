@@ -37,7 +37,7 @@ faire = 'faire';
 
 type = 'entier';
 
-fonction = 'fonction'
+fonction = 'fonction';
 lecture = 'lire';
 ecrire = 'ecrire';
 retourner = 'retourner';
@@ -46,7 +46,7 @@ chiffre = ['0' .. '9']+;
 
 Ignored Tokens
 
-espaces, commentaire;
+espaces,commentaire;
 
 Productions
 
@@ -98,7 +98,7 @@ nombre =
     {chiffre} chiffre ;
 
 instruction =
-    {affect} affect |
+    {affect} variable egale expr|
     {if} if |
     {while} tant_que_logique expr faire bloc_inst |
     {return} retourner parenthese_ouvrante expr parenthese_fermante |
@@ -108,9 +108,13 @@ instruction =
     {block_instructions} accolade_ouvrante instruction block accolade_fermante ;
 if =
     {si} si expr alors bloc_inst|
-    {si_sinon} si expr alors bloc_inst sinon bloc_inst ;
+    {si_sinon} si expr alors bloc_inst sinon bloc_instructions ;
 
 
 block =
     {bloque} instruction block|
     {vide};
+
+variable =
+    {var};
+
