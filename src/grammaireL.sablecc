@@ -100,9 +100,11 @@ instruction =
     {if} if |
     {while} while |
     {return} return |
-    {apl_fonct} apl_fonct;
+    {apl_fonct} apl_fonct|
     {write} write |
     {read} read;
 if =
     {si} si expr alors bloc_inst|
     {si_sinon} si expr alors bloc_inst sinon bloc_inst ;
+while =
+    {tantque} tant_que_logique expr faire bloc_inst ;
