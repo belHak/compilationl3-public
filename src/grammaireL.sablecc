@@ -13,6 +13,8 @@ parenthese_ouvrante = '(' ;
 parenthese_fermante = ')' ;
 accolade_ouvrante = '{';
 accolade_fermante = '}';
+crochet_ouvrant = '[';
+crochet_fermant =  ']';
 
 egale = '=' ;
 et = '&' ;
@@ -37,12 +39,15 @@ faire = 'faire';
 
 type = 'entier';
 
-fonction = 'fonction';
-lecture = 'lire';
+
+lire = 'lire';
 ecrire = 'ecrire';
 retourner = 'retourner';
+main = 'main';
 
 chiffre = ['0' .. '9']+;
+
+nom = lettre lettre*;
 
 Ignored Tokens
 
@@ -51,6 +56,17 @@ espaces,commentaire;
 Productions
 
 programme = optdecvar listedecfonc ;
+
+optdecvar =
+    {decla_glob} decla_variable |
+    {vide};
+
+listedecfonc =
+    {main_fnc} main_fonc|
+    {autre_fnc} fonction listedecfonc;
+
+main_fonc =
+    {main} main parenthese_ouvrante parenthese_fermante decla_variable bloc_inst ;
 
 list_expr =
     {expr} expr sous_list_expr |
@@ -85,10 +101,10 @@ exp4 =
 
 exp5 =
     {exp6} exp6 |
-    {non_logique} non_logique parenthese_ouvrante exp6 perenthese_fermante ;
+    {non_logique} non_logique parenthese_ouvrante exp6 parenthese_fermante ;
 
 exp6 =
-    {parenthese} parenthse_ouvrante expr parenthse_fermante |
+    {parenthese} parenthese_ouvrante expr parenthese_fermante |
     {nombrer} nombre |
     {apl_fonc} apl_fonc |
     {variable} variable ;
@@ -98,23 +114,47 @@ nombre =
     {chiffre} chiffre ;
 
 instruction =
-    {affect} variable egale expr|
-    {if} if |
+    {affect} variable egale expr point_virgule|
+    {if} si expr alors bloc_inst compl |
     {while} tant_que_logique expr faire bloc_inst |
-    {return} retourner parenthese_ouvrante expr parenthese_fermante |
-    {apl_fonct} fonction parenthese_ouvrante list_expr parenthese_fermante|
-    {write} ecrire parenthese_ouvrante expr parenthese_fermante |
-    {read} read |
-    {block_instructions} accolade_ouvrante instruction block accolade_fermante ;
-if =
-    {si} si expr alors bloc_inst|
-    {si_sinon} si expr alors bloc_inst sinon bloc_instructions ;
+    {return} retourner parenthese_ouvrante expr parenthese_fermante point_virgule |
+    {apl_fonc} apl_fonc point_virgule|
+    {block_instructions} bloc_inst ;
 
-
-block =
-    {bloque} instruction block|
+compl =
+    {decla_si_sinon} sinon bloc_inst |
     {vide};
 
-variable =
-    {var};
+bloc_inst =
+    {bloque} accolade_ouvrante list_inst accolade_fermante ;
 
+list_inst =
+    {list} instruction sous_list_inst |
+    {vide};
+
+sous_list_inst =
+    {sous_list} instruction sous_list_inst |
+    {vide};
+
+decla_variable =
+    {declaration} type variable point_virgule |
+    {decla_suiv} type variable virgule decla_variable |
+    {decla_seule} type variable ;
+
+variable =
+    {var} nom |
+    {tab} nom crochet_ouvrant nombre crochet_fermant;
+
+fonction =
+    {decla_fnc} nom parenthese_ouvrante decla_variable parenthese_fermante decla_variable bloc_inst ;
+
+apl_fonc =
+    {decla_apl_fonc} nom parenthese_ouvrante list_expr parenthese_fermante |
+    {lec} lecture |
+    {ecr} ecriture;
+
+lecture =
+    {decla_lec} lire parenthese_ouvrante parenthese_fermante;
+
+ecriture =
+    {decla_ecri} ecrire parenthese_ouvrante expr parenthese_fermante;
