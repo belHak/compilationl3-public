@@ -3,158 +3,174 @@ Package sc;
 Helpers
 
 lettre = [['a' .. 'z'] + ['A' .. 'Z']];
+chiffre = ['0' .. '9'];
+alpha = [lettre + ['_' + '$']];
+alphanum = [lettre + chiffre];
 
 Tokens
 
 espaces = (' ' | 13 | 10)+;
 commentaire= '#' [[0 .. 0xffff] - [10 + 13]]* (10 | 13 | 10 13);
-
-parenthese_ouvrante = '(' ;
-parenthese_fermante = ')' ;
+virgule = ',';
+divise = '/';
+point_virgule = ';';
+fois = '*';
+moins = '-';
+parenthese_ouvrante = '(';
+parenthese_fermante = ')';
+crochet_ouvrant = '[';
+crochet_fermant = ']';
 accolade_ouvrante = '{';
 accolade_fermante = '}';
-crochet_ouvrant = '[';
-crochet_fermant =  ']';
-
-egale = '=' ;
-et = '&' ;
-ou = '|' ;
+egal = '=';
 inferieur = '<';
-addition = '+' ;
-soustraction = '-' ;
-multiplication = '*' ;
-division = '/';
-mod = '%' ;
-non_logique = '!';
-
-virgule = ',';
-point_virgule = ';' ;
-
-si = 'si' ;
+et = '&';
+ou = '|';
+non = '!';
+plus = '+';
+si = 'si';
 alors = 'alors';
 sinon = 'sinon';
-
-tant_que_logique = 'tantque' ;
+tantque = 'tantque';
 faire = 'faire';
-
-type = 'entier';
-
-
+entier = 'entier';
+retour = 'retour';
 lire = 'lire';
 ecrire = 'ecrire';
-retourner = 'retourner';
-main = 'main';
-
-chiffre = ['0' .. '9']+;
-
-nom = lettre lettre*;
+nombre = chiffre+;
+identif = alpha alphanum*;
 
 Ignored Tokens
 
-espaces,commentaire;
+espaces, commentaire;
 
 Productions
 
-programme = optdecvar listedecfonc ;
+programme =
+{decvarldecfonc} optdecvar listedecfonc |
+{ldecfonc} listedecfonc;
 
-optdecvar =
-    {decla_glob} decla_variable |
-    {vide};
+optdecvar = listedecvar point_virgule;
+
+listedecvar =
+{decvarldecvar} decvar listedecvarbis |
+{decvar} decvar;
+
+listedecvarbis =
+{decvarldecvar} virgule decvar listedecvarbis|
+{decvar} virgule decvar ;
+
+decvar =
+{decvarentier} entier identif |
+{decvartableau} entier identif crochet_ouvrant nombre crochet_fermant ;
 
 listedecfonc =
-    {main_fnc} main_fonc|
-    {autre_fnc} fonction listedecfonc;
+{ldecfoncrec} decfonc listedecfonc |
+{ldecfoncfinal} ;
 
-main_fonc =
-    {main} main parenthese_ouvrante parenthese_fermante optdecvar bloc_inst ;
+decfonc =
+{decvarinstr} identif listeparam optdecvar instrbloc |
+{instr} identif listeparam instrbloc ;
 
-list_expr =
-    {expr} expr sous_list_expr |
-    {vide};
+listeparam =
+{sansparam} parenthese_ouvrante parenthese_fermante |
+{avecparam} parenthese_ouvrante listedecvar parenthese_fermante ;
 
-sous_list_expr =
-    {list_expr} virgule expr sous_list_expr |
-    {vide};
+instr =
+{instraffect} instraffect |
+{instrbloc } instrbloc |
+{instrsi } instrsi |
+{instrtantque } instrtantque |
+{instrappel } instrappel |
+{instrretour } instrretour |
+{instrecriture } instrecriture |
+{instrvide} instrvide ;
 
-expr =
-    {exp1} exp1 |
-    {ou} expr ou exp1 ;
+instraffect = var egal exp point_virgule ;
+
+instrbloc = accolade_ouvrante listeinst accolade_fermante ;
+
+//listeinst = instr*;
+
+listeinst =
+{linstrec} instr listeinst |
+{linstfinal} ;
+
+instrsi =
+{avecsinon} si exp alors instrbloc instrsinon |
+{sanssinon} si exp alors instrbloc ;
+
+instrsinon = sinon instrbloc ;
+
+instrtantque = tantque exp faire instrbloc ;
+
+instrappel = appelfct point_virgule ;
+
+instrretour = retour exp point_virgule ;
+
+instrecriture = ecrire parenthese_ouvrante exp parenthese_fermante point_virgule ;
+
+instrvide = point_virgule ;
+
+//################################################################################
+// exp (booléennes, arithmétiques) avec implémentation des priorités.
+// ordre croissant de priorités comme suit (le | a la plus petite priorité)=
+// 7. | (ou)
+// 6. & (et)
+// 5. < =
+// 4. + -
+// 3. * /
+// 2. ! (non)
+// 1. (exp) appelfct var[exp]
+//###############################################################################*/
+
+exp =
+{ou} exp ou exp1 |
+{exp1} exp1;
 
 exp1 =
-    {exp2} exp2 |
-    {et} exp1 et exp2 ;
+{et} exp1 et exp2 |
+{exp2} exp2;
 
 exp2 =
-    {exp3} exp3 |
-    {egale} exp2 egale exp3 |
-    {inferieur} exp2 inferieur exp3;
+{inf} exp2 inferieur exp3 |
+{egal} exp2 egal exp3 |
+{exp3} exp3;
 
 exp3 =
-    {exp4} exp4 |
-    {addition} exp3 addition exp4 |
-    {soustraction} exp3 soustraction exp4;
+{plus} exp3 plus exp4 |
+{moins} exp3 moins exp4 |
+{exp4} exp4 ;
 
 exp4 =
-    {exp5} exp5 |
-    {multiplication} exp4 multiplication exp5 |
-    {division} exp4 division exp5 ;
+{fois} exp4 fois exp5 |
+{divise} exp4 divise exp5 |
+{exp5} exp5 ;
 
 exp5 =
-    {exp6} exp6 |
-    {non_logique} non_logique parenthese_ouvrante exp6 parenthese_fermante ;
+{non} non exp5 |
+{exp6} exp6 ;
 
 exp6 =
-    {parenthese} parenthese_ouvrante expr parenthese_fermante |
-    {nombrer} nombre |
-    {apl_fonc} apl_fonc |
-    {variable} variable ;
+ {nombre} nombre |
+ {appelfct} appelfct |
+ {var} var |
+ {parentheses} parenthese_ouvrante exp parenthese_fermante |
+ {lire} lire parenthese_ouvrante parenthese_fermante ;
 
-nombre =
-    {chiffres} chiffre nombre|
-    {chiffre} chiffre ;
+// accès à une variable, case d'un tableau ou appel à fonction
 
-instruction =
-    {affect} variable egale expr point_virgule|
-    {if} si expr alors bloc_inst compl |
-    {while} tant_que_logique expr faire bloc_inst |
-    {return} retourner parenthese_ouvrante expr parenthese_fermante point_virgule |
-    {apl_fonc} apl_fonc point_virgule|
-    {block_instructions} bloc_inst ;
+var =
+{vartab} identif crochet_ouvrant exp crochet_fermant |
+{varsimple} identif ;
 
-compl =
-    {decla_si_sinon} sinon bloc_inst |
-    {vide};
+listeexp =
+{recursif} exp listeexpbis|
+{final} ;
 
-bloc_inst =
-    {bloque} accolade_ouvrante list_inst accolade_fermante ;
+listeexpbis =
+{recursif} virgule exp listeexpbis |
+{final} ;
 
-list_inst =
-    {list} instruction sous_list_inst |
-    {vide};
+appelfct = identif parenthese_ouvrante listeexp parenthese_fermante ;
 
-sous_list_inst =
-    {sous_list} instruction sous_list_inst |
-    {vide};
-
-decla_variable =
-    {declaration} type variable point_virgule |
-    {decla_suiv} type variable virgule decla_variable |
-    {decla_seule} type variable ;
-
-variable =
-    {var} nom |
-    {tab} nom crochet_ouvrant nombre crochet_fermant;
-
-fonction =
-    {decla_fnc} nom parenthese_ouvrante decla_variable parenthese_fermante optdecvar bloc_inst ;
-
-apl_fonc =
-    {decla_apl_fonc} nom parenthese_ouvrante list_expr parenthese_fermante |
-    {lec} lecture |
-    {ecr} ecriture;
-
-lecture =
-    {decla_lec} lire parenthese_ouvrante parenthese_fermante;
-
-ecriture =
-    {decla_ecri} ecrire parenthese_ouvrante expr parenthese_fermante;
