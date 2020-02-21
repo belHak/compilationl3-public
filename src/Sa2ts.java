@@ -30,8 +30,12 @@ public class Sa2ts extends SaDepthFirstVisitor<Void> {
     public Void visit(SaDecTab node) {
         defaultIn(node);
 
-        
+
         if(globalTable.getVar(node.getNom()) != null) throw new RuntimeException("le tableau existe déjà");
+
+        if(node.getTaille() < 2) throw new RuntimeException("taille de tableau invalide");
+
+
         node.tsItem = globalTable.addVar(node.getNom(),node.getTaille());
         defaultOut(node);
 
@@ -56,7 +60,7 @@ public class Sa2ts extends SaDepthFirstVisitor<Void> {
 
         for(int index = 0 ; index < nbParam; index++){
             if(localTable.getVar(tete.getNom()) != null)throw new RuntimeException("variable existe");
-            if(tete instanceof SaDecTab)throw new RuntimeException("pas de tableau frr");
+            if(tete instanceof SaDecTab)throw new RuntimeException("pas de tableau en paramètre");
             localTable.addParam(tete.getNom());
             if(queue.getQueue() == null) break;
             queue = queue.getQueue();
@@ -71,13 +75,18 @@ public class Sa2ts extends SaDepthFirstVisitor<Void> {
 
         for(int index = 0 ; index < nbVar; index++){
             if(localTable.getVar(tete.getNom()) != null)throw new RuntimeException("variable existe");
-            if(tete instanceof SaDecTab)throw new RuntimeException("pas de tableau frr");
+
+            if(tete instanceof SaDecTab)throw new RuntimeException("pas de tableau");
+
+
             localTable.addVar(tete.getNom(),1);
             if(queue.getQueue() == null) break;
             queue = queue.getQueue();
             tete = queue.getTete();
 
         }
+
+
         node.tsItem = globalTable.addFct(node.getNom(),nbParam,localTable,node);
         currentTable = localTable;
         node.getCorps().accept(this);
@@ -98,22 +107,25 @@ public class Sa2ts extends SaDepthFirstVisitor<Void> {
     @Override
     public Void visit(SaVarSimple node) {
         defaultIn(node);
-        if(currentTable.getVar(node.getNom()) == null){
-            if(globalTable.getVar(node.getNom()) == null) throw new RuntimeException("variabale non declarée");
 
-            else{
-                if(globalTable.getVar(node.getNom()).getTaille() != 1) throw new RuntimeException("ce n'est pas  une variable simple");
 
-                else
-                    node.tsItem = globalTable.getVar(node.getNom());
-            }
-        }
-        else {
-            if(currentTable.getVar(node.getNom()).getTaille() != 1) throw new RuntimeException("ce n'est pas  une variable simple");
 
-            else
-                node.tsItem = currentTable.getVar(node.getNom());
-        }
+        if(currentTable.getVar(node.getNom()) == null && globalTable.getVar(node.getNom())== null) throw new RuntimeException("variable non déclarée ");
+
+        boolean isGlobal ;
+
+        if(currentTable.getVar(node.getNom()) != null)
+            isGlobal = false ;
+        else
+            isGlobal = true ;
+
+
+        if(isGlobal)
+            node.tsItem = globalTable.getVar(node.getNom());
+        else
+            node.tsItem = currentTable.getVar(node.getNom());
+
+
         defaultOut(node);
         return null ;
 
@@ -122,8 +134,11 @@ public class Sa2ts extends SaDepthFirstVisitor<Void> {
     @Override
     public Void visit(SaAppel node) {
         defaultIn(node);
-        if(globalTable.getFct(node.getNom()) == null) throw new RuntimeException("votre fonction n'existe pas");
+
+        if(globalTable.getFct(node.getNom()) == null) throw new RuntimeException("la fonction n'existe pas");
+
         int nbArgs = node.getArguments() == null ? 0 : node.getArguments().length();
+
         if(globalTable.getFct(node.getNom()).nbArgs != nbArgs) throw new RuntimeException("nombre d'arguments incoherent");
 
         node.tsItem = globalTable.getFct(node.getNom());
