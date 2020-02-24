@@ -101,7 +101,7 @@ public class Sa2ts extends SaDepthFirstVisitor<Void> {
         defaultIn(node);
         String nom = node.getNom();
 
-        int nbARgs = node.getArguments().length();
+        int nbARgs = node.getArguments() == null ? 0 : node.getArguments().length();
         TsItemFct tsItemFct = tsGlobal.getFct(nom);
 
         if(FncDoesNotExists(nom)) throw new RuntimeException("This function : "+nom+" does not exists");
