@@ -604,9 +604,9 @@ public class Sc2sa extends DepthFirstAdapter {
     @Override
     public void caseAAppelfctExp6(AAppelfctExp6 node) {
         inAAppelfctExp6(node);
-        SaAppel appel;
+        SaExpAppel appel;
         node.getAppelfct().apply(this);
-        appel = (SaAppel) returnValue;
+        appel = (SaExpAppel) returnValue;
         returnValue = appel;
     }
 
