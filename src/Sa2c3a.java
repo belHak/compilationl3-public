@@ -156,9 +156,8 @@ public class Sa2c3a extends SaDepthFirstVisitor<C3aOperand> {
         c3a.addLabelToNextInst(faux);
         c3a.ajouteInst(new C3aInstAffect(c3a.False,temp,""));
         c3a.addLabelToNextInst(vrai);
-
-        defaultIn(node);
-        return null;
+        defaultOut(node);
+        return temp;
     }
 
     @Override
@@ -170,14 +169,113 @@ public class Sa2c3a extends SaDepthFirstVisitor<C3aOperand> {
 
     @Override
     public C3aOperand visit(SaInstEcriture node) {
-        C3aOperand operand = node.getArg().accept(this);
+        defaultIn(node);
+
+        SaExp exp = node.getArg();
+        C3aOperand operand = exp == null ? null : exp.accept(this) ;
         c3a.ajouteInst(new C3aInstWrite(operand,""));
+
+        defaultOut(node);
         return operand;
     }
 
     @Override
-    public C3aOperand visit(SaExp node) {
+    public C3aOperand visit(SaExpAppel node) {
+        defaultIn(node);
+        SaLExp arg = node.getVal().getArguments();
+        if(arg != null) arg.accept(this);
+
+        defaultOut(node);
+        return  null;
+    }
+
+    @Override
+    public C3aOperand visit(SaLExp node) {
+        defaultIn(node);
+
+        SaExp exp = node.getTete();
+        C3aOperand operand = exp == null ? null : exp.accept(this);
+        new C3aInstParam(operand,"");
+
+        defaultOut(node);
+        return operand;
+    }
+
+
+    @Override
+    public C3aOperand visit(SaExpVar node) {
+        defaultIn(node);
+        SaVar var = node.getVar();
+        C3aOperand operande = var == null ? null :  var.accept(this);
+        defaultOut(node);
+        return operande;
+    }
+
+    @Override
+    public C3aOperand visit(SaInstTantQue node) {
+        return super.visit(node);
+    }
+
+    @Override
+    public C3aOperand visit(SaLInst node) {
+        return super.visit(node);
+    }
+
+    @Override
+    public C3aOperand visit(SaInstAffect node) {
+        return super.visit(node);
+    }
+
+    @Override
+    public C3aOperand visit(SaExpInf node) {
+        return super.visit(node);
+    }
+
+    @Override
+    public C3aOperand visit(SaExpEqual node) {
+        return super.visit(node);
+    }
+
+    @Override
+    public C3aOperand visit(SaExpOr node) {
+        return super.visit(node);
+    }
+
+    @Override
+    public C3aOperand visit(SaExpNot node) {
+        return super.visit(node);
+    }
+
+    @Override
+    public C3aOperand visit(SaExpLire node) {
+        return super.visit(node);
+    }
+
+    @Override
+    public C3aOperand visit(SaInstBloc node) {
+        return super.visit(node);
+    }
+
+    @Override
+    public C3aOperand visit(SaInstSi node) {
+        return super.visit(node);
+    }
+
+    @Override
+    public C3aOperand visit(SaInstRetour node) {
+        return super.visit(node);
+    }
+
+    @Override
+    public C3aOperand visit(SaVarSimple node) {
+        // doit renvoyer une instance de C3aVar
+        //return new C3aVar(node.tsItem,)
         return null;
+    }
+
+    @Override
+    public C3aOperand visit(SaVarIndicee node) {
+        return super.visit(node);
     }
 
     public C3a getC3a() {
