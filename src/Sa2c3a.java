@@ -2,6 +2,7 @@ import c3a.*;
 import sa.*;
 import ts.Ts;
 import ts.TsItemFct;
+import ts.TsItemVar;
 
 public class Sa2c3a extends SaDepthFirstVisitor<C3aOperand> {
     private C3a c3a;
@@ -58,13 +59,13 @@ public class Sa2c3a extends SaDepthFirstVisitor<C3aOperand> {
 
         TsItemFct tsItemFct = node.tsItem;
         C3aFunction function = new C3aFunction(tsItemFct);
-
-        C3aInstCall call = new C3aInstCall(function,c3a.newTemp(),"");
-
+        C3aTemp t = c3a.newTemp();
+        C3aInstCall call = new C3aInstCall(function,t,"");
+        node.getArguments().accept(this);
         c3a.ajouteInst(call);
 
         defaultOut(node);
-        return function;
+        return t;
     }
 
     @Override
@@ -182,20 +183,30 @@ public class Sa2c3a extends SaDepthFirstVisitor<C3aOperand> {
     @Override
     public C3aOperand visit(SaExpAppel node) {
         defaultIn(node);
-        SaLExp arg = node.getVal().getArguments();
-        if(arg != null) arg.accept(this);
+        SaAppel val = node.getVal();
 
+        C3aOperand operand = val == null ? null: val.accept(this);
         defaultOut(node);
-        return  null;
+        return operand ;
     }
 
     @Override
     public C3aOperand visit(SaLExp node) {
         defaultIn(node);
+        int length = node.length();
+        SaExp tete = node.getTete();
+        SaLExp queue = node.getQueue();
+        C3aOperand operand = null;
+        for(int i =0; i<length; i++){
 
-        SaExp exp = node.getTete();
-        C3aOperand operand = exp == null ? null : exp.accept(this);
-        new C3aInstParam(operand,"");
+            if(tete != null) {
+                operand =  tete.accept(this);
+                c3a.ajouteInst(new C3aInstParam(operand,""));
+                tete = queue.getTete();
+            }
+            if(queue.getQueue() != null)
+            queue = queue.getQueue();
+        }
 
         defaultOut(node);
         return operand;
@@ -263,14 +274,19 @@ public class Sa2c3a extends SaDepthFirstVisitor<C3aOperand> {
 
     @Override
     public C3aOperand visit(SaInstRetour node) {
-        return super.visit(node);
+        defaultIn(node);
+
+        C3aOperand operand = node.getVal() == null ? null : node.getVal().accept(this);
+        c3a.ajouteInst(new C3aInstReturn(operand,""));
+
+        defaultOut(node);
+        return operand;
     }
 
     @Override
     public C3aOperand visit(SaVarSimple node) {
-        // doit renvoyer une instance de C3aVar
-        //return new C3aVar(node.tsItem,)
-        return null;
+        TsItemVar var = node.tsItem;
+        return new C3aVar(var,null);
     }
 
     @Override
