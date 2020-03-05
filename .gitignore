@@ -3,3 +3,4 @@
 *.sc
 *.l
 /src/sc
+/.idea/misc.xml
