@@ -327,7 +327,10 @@ public class Sa2c3a extends SaDepthFirstVisitor<C3aOperand> {
 
     @Override
     public C3aOperand visit(SaExpLire node) {
-        return super.visit(node);
+
+        c3a.ajouteInst(new C3aInstRead(null,""));
+
+        return null ;
     }
 
     @Override
