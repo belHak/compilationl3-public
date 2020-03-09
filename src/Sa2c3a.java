@@ -243,7 +243,7 @@ public class Sa2c3a extends SaDepthFirstVisitor<C3aOperand> {
 
 
 
-    
+
     @Override
     public C3aOperand visit(SaExpInf node) {
         return super.visit(node);
@@ -256,12 +256,68 @@ public class Sa2c3a extends SaDepthFirstVisitor<C3aOperand> {
 
     @Override
     public C3aOperand visit(SaExpAnd node) {
-        return super.visit(node);
+
+        defaultIn(node);
+        C3aOperand op1 = node.getOp1() == null ? null : node.getOp1().accept(this);
+        C3aOperand op2 = new C3aConstant(0);
+        C3aLabel l0 = c3a.newAutoLabel();
+        C3aLabel l1 = c3a.newAutoLabel();
+        C3aInstJumpIfEqual if1 = new C3aInstJumpIfEqual(op1,op2,l1,"");
+        c3a.ajouteInst(if1);
+
+        C3aOperand op3 = node.getOp1() == null ? null : node.getOp2().accept(this);
+
+        C3aInstJumpIfEqual if2 = new C3aInstJumpIfEqual(op3,op2,l1,"");
+        c3a.ajouteInst(if2);
+
+        C3aTemp t0 = c3a.newTemp();
+        C3aInstAffect affect1 = new C3aInstAffect(new C3aConstant(1),t0,"");
+        c3a.ajouteInst(affect1);
+
+        C3aInstJump jumpTol0 = new C3aInstJump(l0,"");
+        c3a.ajouteInst(jumpTol0);
+
+        c3a.addLabelToNextInst(l1);
+
+        c3a.ajouteInst(new C3aInstAffect(new C3aConstant(0),t0,""));
+
+        c3a.addLabelToNextInst(l0);
+
+        defaultOut(node);
+        return t0 ;
     }
 
     @Override
     public C3aOperand visit(SaExpOr node) {
-        return super.visit(node);
+
+        defaultIn(node);
+        C3aOperand op1 = node.getOp1() == null ? null : node.getOp1().accept(this);
+        C3aOperand op2 = new C3aConstant(0);
+        C3aLabel l0 = c3a.newAutoLabel();
+        C3aLabel l1 = c3a.newAutoLabel();
+        C3aInstJumpIfNotEqual if1 = new C3aInstJumpIfNotEqual(op1,op2,l1,"");
+        c3a.ajouteInst(if1);
+
+        C3aOperand op3 = node.getOp1() == null ? null : node.getOp2().accept(this);
+
+        C3aInstJumpIfNotEqual if2 = new C3aInstJumpIfNotEqual(op3,op2,l1,"");
+        c3a.ajouteInst(if2);
+
+        C3aTemp t0 = c3a.newTemp();
+        C3aInstAffect affect1 = new C3aInstAffect(new C3aConstant(0),t0,"");
+        c3a.ajouteInst(affect1);
+
+        C3aInstJump jumpTol0 = new C3aInstJump(l0,"");
+        c3a.ajouteInst(jumpTol0);
+
+        c3a.addLabelToNextInst(l1);
+
+        c3a.ajouteInst(new C3aInstAffect(new C3aConstant(1),t0,""));
+
+        c3a.addLabelToNextInst(l0);
+
+        defaultOut(node);
+        return t0 ;
     }
 
     @Override
