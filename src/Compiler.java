@@ -5,7 +5,7 @@ import java.io.*;
 import sa.*;
 import ts.*;
 import c3a.*;
-import nasm.*;
+//import nasm.*;
 //import fg.*;
 
 public class Compiler
@@ -56,11 +56,10 @@ public class Compiler
 	    System.out.print("[PRINT C3A] ");
 			c3a.affiche(baseName);
 
-	    System.out.println("[PRINT C3A OUT]");
+	  /*  System.out.println("[PRINT C3A OUT]");
 	    C3aEval c3aEval = new C3aEval(c3a, table);
 	    c3aEval.affiche(baseName);
 
-	    /*
 	    System.out.print("[BUILD PRE NASM] ");
 	    Nasm nasm = new C3a2nasm(c3a, table).getNasm();
 	    System.out.println("[PRINT PRE NASM] ");
