@@ -5,7 +5,7 @@ import java.io.*;
 import sa.*;
 import ts.*;
 import c3a.*;
-//import nasm.*;
+import nasm.*;
 //import fg.*;
 
 public class Compiler
@@ -16,7 +16,7 @@ public class Compiler
 		String baseName = null;
 		try {
 			if (0 < args.length) {
-				br = new PushbackReader(new FileReader(args[0]), 1024);
+		br = new PushbackReader(new FileReader(args[0]), 1024);
 				baseName = removeSuffix(args[0], ".l");
 			}
 			else{
@@ -30,36 +30,36 @@ public class Compiler
 			// Create a Parser instance.
 			Parser p = new Parser(new Lexer(br));
 			// Parse the input.
-			System.out.print("[BUILD SC] ");
+	    System.out.print("[BUILD SC] ");
 			Start tree = p.parse();
 
-			System.out.println("[PRINT SC]");
+	    System.out.println("[PRINT SC]");
 			tree.apply(new Sc2Xml(baseName));
 
-			System.out.print("[BUILD SA] ");
+	    System.out.print("[BUILD SA] ");
 			Sc2sa sc2sa = new Sc2sa();
 			tree.apply(sc2sa);
 			SaNode saRoot = sc2sa.getRoot();
 
-			System.out.println("[PRINT SA]");
+	    System.out.println("[PRINT SA]");
 			new Sa2Xml(saRoot, baseName);
 
-			System.out.print("[BUILD TS] ");
+	    System.out.print("[BUILD TS] ");
 			Ts table = new Sa2ts(saRoot).getTableGlobale();
 
-			System.out.println("[PRINT TS]");
+	    System.out.println("[PRINT TS]");
 			table.afficheTout(baseName);
 
-			System.out.print("[BUILD C3A]");
+	    System.out.print("[BUILD C3A]");
 			C3a c3a = new Sa2c3a(saRoot, table).getC3a();
 
-			System.out.print("[PRINT C3A] ");
+	    System.out.print("[PRINT C3A] ");
 			c3a.affiche(baseName);
 
-		/*	System.out.println("[PRINT C3A OUT]");
-			C3aEval c3aEval = new C3aEval(c3a, table);
-			c3aEval.affiche(baseName);
-
+	    System.out.println("[PRINT C3A OUT]");
+	    C3aEval c3aEval = new C3aEval(c3a, table);
+	    c3aEval.affiche(baseName);
+	    /*
 	    System.out.print("[BUILD PRE NASM] ");
 	    Nasm nasm = new C3a2nasm(c3a, table).getNasm();
 	    System.out.println("[PRINT PRE NASM] ");
