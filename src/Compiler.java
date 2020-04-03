@@ -5,7 +5,7 @@ import java.io.*;
 import sa.*;
 import ts.*;
 import c3a.*;
-//import nasm.*;
+import nasm.*;
 //import fg.*;
 
 public class Compiler
@@ -50,7 +50,7 @@ public class Compiler
 	    System.out.println("[PRINT TS]");
 			table.afficheTout(baseName);
 
-	    System.out.print("[BUILD C3A]");
+	    System.out.println("[BUILD C3A]");
 			C3a c3a = new Sa2c3a(saRoot, table).getC3a();
 
 	    System.out.print("[PRINT C3A] ");
@@ -58,13 +58,13 @@ public class Compiler
 
 	  /*  System.out.println("[PRINT C3A OUT]");
 	    C3aEval c3aEval = new C3aEval(c3a, table);
-	    c3aEval.affiche(baseName);
+	    c3aEval.affiche(baseName);*/
 
-	    System.out.print("[BUILD PRE NASM] ");
+	    System.out.println("[BUILD PRE NASM] ");
 	    Nasm nasm = new C3a2nasm(c3a, table).getNasm();
 	    System.out.println("[PRINT PRE NASM] ");
 	    nasm.affichePre(baseName);
-
+/*
 
 	    System.out.print("[BUILD FG] ");
 	    Fg fg = new Fg(nasm);
@@ -77,7 +77,7 @@ public class Compiler
       */
 		}
 		catch(Exception e){
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
