@@ -1,3 +1,4 @@
+import nasm.Nasm;
 import sc.parser.*;
 import sc.lexer.*;
 import sc.node.*;
@@ -51,14 +52,14 @@ public class Compiler
 			table.afficheTout(baseName);
 
 	    System.out.print("[BUILD C3A]");
-			C3a c3a = new Sa2c3a(saRoot, table).getC3a();
+			C3a c3a = new Sa2c3a(saRoot).getC3a();
 
 	    System.out.print("[PRINT C3A] ");
 			c3a.affiche(baseName);
 
 	  /*  System.out.println("[PRINT C3A OUT]");
 	    C3aEval c3aEval = new C3aEval(c3a, table);
-	    c3aEval.affiche(baseName);
+	    c3aEval.affiche(baseName);*/
 
 	    System.out.print("[BUILD PRE NASM] ");
 	    Nasm nasm = new C3a2nasm(c3a, table).getNasm();
@@ -66,7 +67,7 @@ public class Compiler
 	    nasm.affichePre(baseName);
 
 
-	    System.out.print("[BUILD FG] ");
+	   /* System.out.print("[BUILD FG] ");
 	    Fg fg = new Fg(nasm);
 	    System.out.print("[PRINT FG] ");
 	    fg.affiche(baseName);
