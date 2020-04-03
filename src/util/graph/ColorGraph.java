@@ -22,8 +22,8 @@ public class ColorGraph {
 	pile         = new Stack<Integer>(); 
 	R            = G.nodeCount();
 	couleur      = new int[R];
-	removed      = new IntSet(R);
-	spill        = new IntSet(R);
+	enleves      = new IntSet(R);
+	deborde      = new IntSet(R);
 	int2Node     = G.nodeArray();
 	for(int v=0; v < R; v++){
 	    int preColor = phi[v];
@@ -48,6 +48,7 @@ public class ColorGraph {
     
     public IntSet couleursVoisins(int t)
     {
+        return null;
     }
     
     /*-------------------------------------------------------------------------------------------------------------*/
@@ -56,6 +57,7 @@ public class ColorGraph {
     
     public int choisisCouleur(IntSet colorSet)
     {
+        return -1;
     }
     
     /*-------------------------------------------------------------------------------------------------------------*/
@@ -64,6 +66,7 @@ public class ColorGraph {
     
     public int nbVoisins(int t)
     {
+        return -1;
     }
 
     /*-------------------------------------------------------------------------------------------------------------*/
@@ -75,6 +78,7 @@ public class ColorGraph {
 
     public int simplification()
     {
+        return -1;
     }
     
     /*-------------------------------------------------------------------------------------------------------------*/
