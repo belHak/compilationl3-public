@@ -236,12 +236,9 @@ if __name__ == "__main__" :
   saEvaluation = evaluateSa(inputFiles)
   saOutEvaluation = evaluateDiff(inputFiles, ".saout", "saout-ref/", "Execution de l'arbre abstrait")
   tsEvaluation = evaluateDiff(inputFiles, ".ts", "ts-ref/", "Table des Symboles")
-<<<<<<< HEAD
-  c3aEvaluation = evaluateDiff(inputFiles, ".c3a", "c3a-ref/", "Code 3 Adresses")
-=======
+
   c3aEvaluation = evaluateDiff(inputFiles, ".c3aout", "c3aout-ref/", "Code 3 Adresses")
   nasmEvaluation = evaluateNasm(inputFiles)
->>>>>>> 76a8b0acf5148cd7daaa77f9ad05a67941fdfb85
 
   useColor = True
 
