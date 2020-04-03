@@ -90,11 +90,7 @@ def findInputFiles() :
 
 ################################################################################
 def deleteCompilationOutputs() :
-<<<<<<< HEAD
-  outputExtensions = [".sa", ".sc", ".ts", ".nasm", ".pre-nasm", ".c3a", ".fg", ".fgs", ".ig"]
-=======
   outputExtensions = [".exe", ".o", ".out", ".sa", ".sc", ".ts", ".nasm", ".pre-nasm", ".c3a", ".c3aout", ".fg", ".fgs", ".ig"]
->>>>>>> 76a8b0acf5148cd7daaa77f9ad05a67941fdfb85
   for filename in os.listdir(inputPath) :
     if os.path.splitext(filename)[1] in outputExtensions :
       os.remove(inputPath+filename)
