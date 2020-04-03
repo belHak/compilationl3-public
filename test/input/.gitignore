@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 *.sc
 *.sa
 *.ts
@@ -5,3 +6,19 @@
 *.nasm
 *.fg
 *.fgs
+=======
+*\.sc
+*\.sa
+*\.ts
+*\.c3a
+*\.c3aout
+*\.pre-nasm
+*\.nasm
+*\.ig
+*\.fg
+*\.fgs
+*\.exe
+*\.out
+*\.saout
+*\.o
+>>>>>>> 76a8b0acf5148cd7daaa77f9ad05a67941fdfb85
