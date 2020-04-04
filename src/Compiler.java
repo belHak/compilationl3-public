@@ -74,11 +74,11 @@ public class Compiler {
 	    Fg fg = new Fg(nasm);
 	    System.out.println("[PRINT FG] ");
 	    fg.affiche(baseName);
-/*
+
 	    System.out.println("[SOLVE FG]");
 	    FgSolution fgSolution = new FgSolution(nasm, fg);
 	    fgSolution.affiche(baseName);
-      */
+
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
