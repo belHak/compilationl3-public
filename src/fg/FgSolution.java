@@ -75,13 +75,13 @@ public class FgSolution implements NasmVisitor<Void> {
             if (destination instanceof NasmAddress) {
                 NasmAddress add = ((NasmAddress) destination);
 
-                if (add.base.isGeneralRegister()) {
+                if (add.base != null && add.base.isGeneralRegister()) {
                     NasmRegister reg = ((NasmRegister) add.base);
                     useSet.add(reg.val);
                     defSet.add(reg.val);
                 }
 
-                if (add.offset.isGeneralRegister()) {
+                if (add.offset != null && add.offset.isGeneralRegister()) {
                     NasmRegister reg = ((NasmRegister) add.offset);
                     useSet.add(reg.val);
                     defSet.add(reg.val);
@@ -152,12 +152,12 @@ public class FgSolution implements NasmVisitor<Void> {
         int reg_num_2 = -1;
 
 
-        if (destination.isGeneralRegister()) {
+        if (destination != null && destination.isGeneralRegister()) {
             NasmRegister reg_dest = ((NasmRegister) destination);
             reg_num_1 = reg_dest.val;
         }
 
-        if (source.isGeneralRegister()) {
+        if (source != null && source.isGeneralRegister()) {
             NasmRegister reg_source = ((NasmRegister) source);
             reg_num_2 = reg_source.val;
         }
@@ -228,7 +228,7 @@ public class FgSolution implements NasmVisitor<Void> {
             emptyUseOrDef(inst , use);
             return null;
         }
-
+//Peut-être un bogue
         if(dest instanceof NasmAddress){
             add2IntSetARegFromAddr(useSet1,  dest);
         }else{
@@ -256,14 +256,29 @@ public class FgSolution implements NasmVisitor<Void> {
         return null;
     }
 
+    private void addRegInUse(NasmInst inst, NasmOperand op, IntSet intSet,Map<NasmInst, IntSet> inst2intSet) {
+        if(op instanceof NasmAddress){
+            add2IntSetARegFromAddr(intSet, op);
+        }else{
+            if(op.isGeneralRegister()){
+                NasmRegister reg = ((NasmRegister) op);
+                intSet.add(reg.val);
+            }else {
+                emptyUseOrDef(inst, inst2intSet);
+                return;
+            }
+        }
+        inst2intSet.put(inst, intSet);
+    }
+
     private void add2IntSetARegFromAddr(IntSet useSet, NasmOperand dest) {
         NasmAddress add = ((NasmAddress)dest);
-        if(add.base.isGeneralRegister()){
+        if(add.base != null && add.base.isGeneralRegister()){
             NasmRegister reg = ((NasmRegister)add.base);
             useSet.add(reg.val);
         }
 
-        if (add.offset.isGeneralRegister()){
+        if (add.offset != null && add.offset.isGeneralRegister()){
             NasmRegister reg = ((NasmRegister)add.offset);
             useSet.add(reg.val);
         }
@@ -360,16 +375,26 @@ public class FgSolution implements NasmVisitor<Void> {
     }
 
     private void nasmMovSolution(NasmMov inst, NasmOperand op, Map<NasmInst, IntSet> inst2intSet) {
-        if (op.isGeneralRegister()) {
 
-            NasmRegister reg = ((NasmRegister) op);
-            IntSet intSet = new IntSet(reg.val + 1);
-            intSet.add(reg.val);
-            inst2intSet.put(inst, intSet);
+        int value = getGreatestValueOfRegister(op);
 
-        }else {
-            emptyUseOrDef(inst, inst2intSet);
+        IntSet intSet = value == -1 ? null : new IntSet(value + 1 );
+        if(intSet != null){
+            addRegInUse(inst,op,intSet,inst2intSet);
+        }else{
+            emptyUseOrDef(inst,inst2intSet);
         }
+//
+//        if (op.isGeneralRegister()) {
+//
+//            NasmRegister reg = ((NasmRegister) op);
+//            IntSet intSet = new IntSet(reg.val + 1);
+//            intSet.add(reg.val);
+//            inst2intSet.put(inst, intSet);
+//
+//        }else {
+//            emptyUseOrDef(inst, inst2intSet);
+//        }
     }
 
     @Override
