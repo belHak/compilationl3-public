@@ -311,16 +311,16 @@ public class FgSolution implements NasmVisitor<Void> {
     @Override
     public Void visit(NasmPop inst) {
         emptyUseOrDef(inst,use);
-        NasmOperand destination = inst.destination;
 
-        if( destination.isGeneralRegister()){
-            NasmRegister reg = ((NasmRegister)inst.destination);
-            IntSet intSet = new IntSet(reg.val + 1 );
-            intSet.add(reg.val);
-            def.put(inst,intSet);
-        }else {
+        int value = getGreatestValueOfRegister(inst.destination);
+
+        IntSet intSet = value == -1 ? null : new IntSet(value + 1 );
+        if(intSet != null){
+            addRegInUse(inst,inst.destination,intSet,def);
+        }else{
             emptyUseOrDef(inst,def);
         }
+
         return null;
     }
 
@@ -384,17 +384,6 @@ public class FgSolution implements NasmVisitor<Void> {
         }else{
             emptyUseOrDef(inst,inst2intSet);
         }
-//
-//        if (op.isGeneralRegister()) {
-//
-//            NasmRegister reg = ((NasmRegister) op);
-//            IntSet intSet = new IntSet(reg.val + 1);
-//            intSet.add(reg.val);
-//            inst2intSet.put(inst, intSet);
-//
-//        }else {
-//            emptyUseOrDef(inst, inst2intSet);
-//        }
     }
 
     @Override
