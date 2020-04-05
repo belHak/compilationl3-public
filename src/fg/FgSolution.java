@@ -53,59 +53,93 @@ public class FgSolution implements NasmVisitor<Void> {
         return null;
     }
 
-    /**
-     * Cast Error
-     * @param inst
-     */
     private void useAndDefForArithmeticOpsExceptDiv(NasmInst inst) {
         NasmOperand destination = inst.destination;
         NasmOperand source = inst.source;
 
-        int result = getResult(destination, source);
+        int useIntSetValue = searchGreatestRegValue(destination,source);
+        int defIntSetValue = getGreatestValueForDest(destination);
 
-        IntSet useSet;
-        IntSet defSet;
+        IntSet useSet = useIntSetValue == -1 ? null : new IntSet(useIntSetValue + 1);
+        IntSet defSet = defIntSetValue == -1 ? null : new IntSet(defIntSetValue + 1);
 
-
-        useSet = getIntSet( destination, source, result);
-
-        if (useSet == null) {
-            emptyUseOrDef(inst, def);
-            emptyUseOrDef(inst, use);
-            return;
+        if(useSet == null){
+            emptyUseOrDef(inst,use);
         }
 
-        if(destination.isGeneralRegister()){
-            NasmRegister dest = ((NasmRegister) destination);
-            useSet.add(dest.val);
-            defSet = new IntSet(dest.val + 1);
-            defSet.add(dest.val);
-            def.put(inst, defSet);
-            use.put(inst,useSet);
-        }else{
-            emptyUseOrDef(inst, def);
+        if(defSet == null){
+            emptyUseOrDef(inst,def);
         }
 
-        if(source.isGeneralRegister()){
-            NasmRegister src = ((NasmRegister) source);
-            useSet.add(src.val);
-            use.put(inst, useSet);
-        }else if(!destination.isGeneralRegister()){
-            emptyUseOrDef(inst, use);
+        if( useSet != null && defSet != null) {
+            if (destination instanceof NasmAddress) {
+                NasmAddress add = ((NasmAddress) destination);
+
+                if (add.base.isGeneralRegister()) {
+                    NasmRegister reg = ((NasmRegister) add.base);
+                    useSet.add(reg.val);
+                    defSet.add(reg.val);
+                }
+
+                if (add.offset.isGeneralRegister()) {
+                    NasmRegister reg = ((NasmRegister) add.offset);
+                    useSet.add(reg.val);
+                    defSet.add(reg.val);
+                }
+            } else {
+                if (destination.isGeneralRegister()) {
+                    NasmRegister reg = ((NasmRegister) destination);
+                    useSet.add(reg.val);
+                    defSet.add(reg.val);
+                }
+            }
         }
+
+        if(useSet != null) {
+            if (source instanceof NasmAddress) {
+                add2IntSetARegFromAddr(useSet,  source);
+            } else {
+                if (source.isGeneralRegister()) {
+                    NasmRegister reg = ((NasmRegister) source);
+                    useSet.add(reg.val);
+                }
+            }
+        }
+
+        if(useSet != null) use.put(inst, useSet);
+        if(defSet != null) def.put(inst, defSet);
 
     }
 
-    private IntSet getIntSet(NasmOperand destination, NasmOperand source, int result) {
-        IntSet useSet;
-        if (result > 0) {
-            NasmRegister dest = ((NasmRegister)destination);
-            useSet = new IntSet(dest.val + 1);
-        } else if (result < 0) {
-            NasmRegister src = ((NasmRegister)source);
-            useSet = new IntSet(src.val + 1);
-        }else return null;
-        return useSet;
+    private int searchGreatestRegValue(NasmOperand destination, NasmOperand source) {
+        int greatestValueForDest ;
+        int greatestValueForSrc ;
+
+        greatestValueForDest = getGreatestValueForDest(destination);
+
+        greatestValueForSrc = getGreatestValueForSrc(source);
+
+        return Math.max(greatestValueForDest, greatestValueForSrc);
+    }
+
+    private int getGreatestValueForSrc(NasmOperand source) {
+        return getGreatestValueOfRegister(source);
+    }
+
+    private int getGreatestValueForDest(NasmOperand destination) {
+        return getGreatestValueOfRegister(destination);
+    }
+
+    private int getGreatestValueOfRegister(NasmOperand destOrSrc) {
+        int greatestValue = -1;
+        if (destOrSrc instanceof NasmAddress) {
+            NasmAddress add = ((NasmAddress) destOrSrc);
+            greatestValue = getResult(add.base, add.offset);
+        } else if (destOrSrc.isGeneralRegister()) {
+            NasmRegister reg = ((NasmRegister) destOrSrc);
+            greatestValue = reg.val;
+        }
+        return greatestValue;
     }
 
     private void emptyUseOrDef(NasmInst inst, Map<NasmInst, IntSet> inst2intSet) {
@@ -128,7 +162,7 @@ public class FgSolution implements NasmVisitor<Void> {
             reg_num_2 = reg_source.val;
         }
 
-        return Objects.compare(reg_num_1, reg_num_2, Comparator.comparingInt(o -> o));
+        return Math.max(reg_num_1,reg_num_2);
     }
 
     @Override
@@ -186,28 +220,53 @@ public class FgSolution implements NasmVisitor<Void> {
         NasmOperand dest = inst.destination;
         NasmOperand src = inst.source;
 
-        int result = getResult(dest,src);
+        int useValue = searchGreatestRegValue(dest,src);
 
-        IntSet useSet = getIntSet(dest,src, result);
+        IntSet useSet1 = useValue == -1 ? null : new IntSet(useValue + 1) ;
 
-        if(useSet == null){
-            emptyUseOrDef(inst,use);
+        if(useSet1 == null) {
+            emptyUseOrDef(inst , use);
             return null;
         }
 
-        if(dest.isGeneralRegister()){
-            NasmRegister reg = ((NasmRegister)dest);
-            useSet.add(reg.val);
-            use.put(inst,useSet);
+        if(dest instanceof NasmAddress){
+            add2IntSetARegFromAddr(useSet1,  dest);
+        }else{
+            if(dest.isGeneralRegister()){
+                NasmRegister reg = ((NasmRegister)dest);
+                useSet1.add(reg.val);
+            }else {
+                emptyUseOrDef(inst, use);
+            }
         }
 
-        if(src.isGeneralRegister()){
-            NasmRegister reg = ((NasmRegister)src);
-            useSet.add(reg.val);
-            use.put(inst,useSet);
+        if(src instanceof NasmAddress){
+            add2IntSetARegFromAddr(useSet1,  src);
+        }else{
+            if(src.isGeneralRegister()){
+                NasmRegister reg = ((NasmRegister)src);
+                useSet1.add(reg.val);
+            }else {
+                emptyUseOrDef(inst, use);
+            }
         }
+        use.put(inst,useSet1);
+
 
         return null;
+    }
+
+    private void add2IntSetARegFromAddr(IntSet useSet, NasmOperand dest) {
+        NasmAddress add = ((NasmAddress)dest);
+        if(add.base.isGeneralRegister()){
+            NasmRegister reg = ((NasmRegister)add.base);
+            useSet.add(reg.val);
+        }
+
+        if (add.offset.isGeneralRegister()){
+            NasmRegister reg = ((NasmRegister)add.offset);
+            useSet.add(reg.val);
+        }
     }
 
     @Override
