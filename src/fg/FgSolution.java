@@ -174,13 +174,21 @@ public class FgSolution implements NasmVisitor<Void> {
 
     @Override
     public Void visit(NasmDiv inst) {
-        if (!inst.source.isGeneralRegister()) return null;
-        int reg_val = ((NasmRegister) inst.source).val;
+        emptyUseOrDef(inst,def);
+        if (!inst.source.isGeneralRegister()) {
+            emptyUseOrDef(inst,use);
+            return null;
+        }
 
-        IntSet src_use = new IntSet(reg_val + 1);
+        int value = getGreatestValueOfRegister(inst.source);
 
-        src_use.add(reg_val);
-        use.put(inst, src_use);
+        IntSet intSet = value == -1 ? null : new IntSet(value + 1 );
+        if(intSet != null){
+            addRegInUse(inst,inst.source,intSet,use);
+        }else{
+            emptyUseOrDef(inst,use);
+        }
+
         return null;
     }
 
