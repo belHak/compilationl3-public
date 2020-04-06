@@ -3,6 +3,9 @@ import nasm.*;
 import ts.Ts;
 import ts.TsItemVar;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @SuppressWarnings("FieldCanBeLocal")
 public class C3a2nasm implements C3aVisitor<NasmOperand> {
     private Ts table;
@@ -12,22 +15,24 @@ public class C3a2nasm implements C3aVisitor<NasmOperand> {
 
     C3a2nasm(C3a c3a, Ts table) {
         nasm = new Nasm(table);
-        initialize();
         this.c3a = c3a;
         this.table = table;
+        nasm.setTempCounter(c3a.getTempCounter());
+        initialize();
         for (C3aInst inst : this.c3a.listeInst) {
             inst.accept(this);
         }
+
     }
 
     private void initialize() {
         nasm.ajouteInst(new NasmCall(null, new NasmLabel("main"), ""));
-        NasmRegister reg_eax = nasm.newRegister();
-        reg_eax.colorRegister(Nasm.REG_EAX);
         NasmRegister reg_ebx = nasm.newRegister();
         reg_ebx.colorRegister(Nasm.REG_EBX);
+        NasmRegister reg_eax = nasm.newRegister();
+        reg_eax.colorRegister(Nasm.REG_EAX);
 
-        nasm.ajouteInst(new NasmMov(null, reg_ebx, new NasmConstant(0), " valeur de retour du programme"));
+        nasm.ajouteInst(new NasmMov(null, reg_ebx, new NasmConstant(0), "valeur de retour du programme"));
         nasm.ajouteInst(new NasmMov(null, reg_eax, new NasmConstant(1), ""));
         nasm.ajouteInst(new NasmInt(null, ""));
     }
@@ -52,6 +57,10 @@ public class C3a2nasm implements C3aVisitor<NasmOperand> {
 
         NasmRegister reg_esp = nasm.newRegister();
         reg_esp.colorRegister(Nasm.REG_ESP);
+        //Solution temporaire
+        reg_esp.val = Nasm.REG_ESP;
+        nasm.setTempCounter(nasm.getTempCounter() -1 );
+
         nasm.ajouteInst(new NasmSub(null, reg_esp, new NasmConstant(4), "allocation mémoire pour la valeur de retour"));
         int num = ((C3aTemp) inst.result).num;
         nasm.ajouteInst(new NasmCall(null, new NasmLabel(foncName), ""));
@@ -71,10 +80,18 @@ public class C3a2nasm implements C3aVisitor<NasmOperand> {
         NasmLabel label = new NasmLabel(inst.val.getIdentif());
         NasmRegister reg_ebp = nasm.newRegister();
         reg_ebp.colorRegister(Nasm.REG_EBP);
+        //Solution temporaire
+        reg_ebp.val = Nasm.REG_EBP;
+        nasm.setTempCounter(nasm.getTempCounter() -1 );
+
         nasm.ajouteInst(new NasmPush(label, reg_ebp, "sauvegarde la valeur de ebp"));
 
         NasmRegister reg_esp = nasm.newRegister();
         reg_esp.colorRegister(Nasm.REG_ESP);
+        //Solution temporaire
+        reg_esp.val = Nasm.REG_ESP;
+        nasm.setTempCounter(nasm.getTempCounter() -1 );
+
         nasm.ajouteInst(new NasmMov(null, reg_ebp, reg_esp, "nouvelle valeur de ebp"));
 
         int nbVar = local.nbVar();
@@ -189,10 +206,18 @@ public class C3a2nasm implements C3aVisitor<NasmOperand> {
         NasmOperand label = inst.label != null ? inst.label.accept(this) : null;
         NasmRegister reg_esp = nasm.newRegister();
         reg_esp.colorRegister(Nasm.REG_ESP);
+        //Solution Temporaire
+        reg_esp.val = Nasm.REG_ESP;
+        nasm.setTempCounter(nasm.getTempCounter() -1);
+
         nasm.ajouteInst(new NasmAdd(label, reg_esp, new NasmConstant(4 * local.nbVar()), "désallocation des variables locales"));
 
         NasmRegister reg_ebp = nasm.newRegister();
         reg_ebp.colorRegister(Nasm.REG_EBP);
+        //Solution Temporaire
+        reg_ebp.val = Nasm.REG_EBP;
+        nasm.setTempCounter(nasm.getTempCounter() -1 );
+
         nasm.ajouteInst(new NasmPop(null, reg_ebp, "restaure la valeur de ebp"));
         nasm.ajouteInst(new NasmRet(null, ""));
 
@@ -245,7 +270,6 @@ public class C3a2nasm implements C3aVisitor<NasmOperand> {
 
     @Override
     public NasmOperand visit(C3aInstJump inst) {
-
         NasmOperand label = inst.label != null ? inst.label.accept(this) : null;
         NasmOperand result = inst.result.accept(this);
         nasm.ajouteInst(new NasmJmp(label, result, "Jump"));
@@ -271,6 +295,9 @@ public class C3a2nasm implements C3aVisitor<NasmOperand> {
 
         NasmRegister ebp_reg = nasm.newRegister();
         ebp_reg.colorRegister(Nasm.REG_EBP);
+        //Solution Temporaire
+        ebp_reg.val = Nasm.REG_EBP;
+        nasm.setTempCounter(nasm.getTempCounter() -1 );
 
         NasmAddress addr = new NasmAddress(ebp_reg, '+', new NasmConstant(2));
 
@@ -315,6 +342,9 @@ public class C3a2nasm implements C3aVisitor<NasmOperand> {
 
         NasmRegister reg_ebp = nasm.newRegister();
         reg_ebp.colorRegister(Nasm.REG_EBP);
+        //Solution Temporaire
+        reg_ebp.val = Nasm.REG_EBP;
+        nasm.setTempCounter(nasm.getTempCounter() - 1);
 
         TsItemVar localVar = local.getVar(oper.item.getIdentif());
         if (localVar != null && local != table) {
