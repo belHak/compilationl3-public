@@ -8,9 +8,9 @@ public class Nasm{
     private int tempCounter;
     Ts tableGlobale;
     public static int REG_EAX = 0;
-    public static int REG_EBX = 1;
-    public static int REG_ECX = 2;
-    public static int REG_EDX = 3;
+	public static int REG_EBX = 1;
+	public static int REG_ECX = 2;
+	public static int REG_EDX = 3;
     public static int REG_ESP = -1;
     public static int REG_EBP = -2;
     public static int REG_UNK = -3;
