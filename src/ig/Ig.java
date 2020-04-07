@@ -106,6 +106,36 @@ public class Ig {
 
     public void allocateRegisters(){
 
+        for(NasmInst inst : nasm.listeInst ){
+            NasmOperand source = inst.source ;
+            NasmOperand destination = inst.destination ;
+
+            colorRegister(source);
+            colorRegister(destination);
+        }
+    }
+
+    private void colorRegister(NasmOperand source) {
+        if(source != null) {
+            if(source.isGeneralRegister()) {
+                NasmRegister regSource = (NasmRegister) source;
+                if (regSource.color == Nasm.REG_UNK)
+                    regSource.color = cg.couleur[regSource.val];
+            }
+            else if(source instanceof NasmAddress){
+                NasmAddress adress = (NasmAddress)source;
+                if(adress.base.isGeneralRegister() && adress.base != null){
+                    NasmRegister regSourceBase = (NasmRegister) adress.base;
+                    if (regSourceBase.color == Nasm.REG_UNK)
+                        regSourceBase.color = cg.couleur[regSourceBase.val];
+                }
+                if(adress.offset.isGeneralRegister() && adress.offset != null){
+                    NasmRegister regSourceOff = (NasmRegister) adress.offset ;
+                    if (regSourceOff.color == Nasm.REG_UNK)
+                        regSourceOff.color = cg.couleur[regSourceOff.val];
+                }
+            }
+        }
     }
 
 
