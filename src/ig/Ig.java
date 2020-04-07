@@ -6,6 +6,7 @@ import util.graph.*;
 import util.intset.*;
 
 import java.io.*;
+import java.util.Arrays;
 
 public class Ig {
     public Graph graph;
@@ -13,6 +14,7 @@ public class Ig {
     public int regNb;
     public Nasm nasm;
     public Node int2Node[];
+    public ColorGraph cg;
 
     
     public Ig(FgSolution fgs){
@@ -22,13 +24,11 @@ public class Ig {
 	this.regNb = this.nasm.getTempCounter();
 	this.int2Node = new Node[regNb];
 	this.construction();
-	ColorGraph cg = new ColorGraph(graph,4,getPrecoloredTemporaries());
+	cg = new ColorGraph(graph,4,getPrecoloredTemporaries());
+    cg.coloration();
     }
 
     public void construction(){
-
-        int tempCounter = nasm.getTempCounter();
-
 
         for(int index= 0 ; index < int2Node.length ; index++){
             int2Node[index] = graph.newNode();
@@ -58,9 +58,8 @@ public class Ig {
     public int[] getPrecoloredTemporaries()
     {
     	int[] couleurs = new int[regNb];
-        int counter = 0 ;
-    	for(int couleur : couleurs)
-    	    couleur = -1 ;
+
+        Arrays.fill(couleurs, -1);
 
     	for(NasmInst inst : nasm.listeInst){
     	    NasmOperand destination = inst.destination;
@@ -75,35 +74,38 @@ public class Ig {
     }
 
     private void getPrecoloredRegister(int[] couleurs, NasmOperand source) {
-        if(source.isGeneralRegister()){
-            NasmRegister reg = (NasmRegister)source;
-            if(reg.color != Nasm.REG_UNK
-                    && reg.color != Nasm.REG_ESP
-                    && reg.color !=Nasm.REG_EBP)
-                couleurs[reg.val] = reg.color ;
+        if(source != null){
+            if(source.isGeneralRegister()){
+                NasmRegister reg = (NasmRegister)source;
+                if(reg.color != Nasm.REG_UNK
+                        && reg.color != Nasm.REG_ESP
+                        && reg.color !=Nasm.REG_EBP)
+                    couleurs[reg.val] = reg.color ;
 
-        }
-        else if(source instanceof NasmAddress){
-            NasmAddress adress = (NasmAddress)source;
-            if(adress.base.isGeneralRegister() && adress.base != null){
-                NasmRegister reg = (NasmRegister)adress.base;
-                if(reg.color != Nasm.REG_UNK
-                        && reg.color != Nasm.REG_ESP
-                        && reg.color !=Nasm.REG_EBP)
-                    couleurs[reg.val] = reg.color ;
             }
-            if(adress.offset.isGeneralRegister() && adress.offset != null){
-                NasmRegister reg = (NasmRegister)adress.offset;
-                if(reg.color != Nasm.REG_UNK
-                        && reg.color != Nasm.REG_ESP
-                        && reg.color !=Nasm.REG_EBP)
-                    couleurs[reg.val] = reg.color ;
+            else if(source instanceof NasmAddress){
+                NasmAddress adress = (NasmAddress)source;
+                if(adress.base.isGeneralRegister() && adress.base != null){
+                    NasmRegister reg = (NasmRegister)adress.base;
+                    if(reg.color != Nasm.REG_UNK
+                            && reg.color != Nasm.REG_ESP
+                            && reg.color !=Nasm.REG_EBP)
+                        couleurs[reg.val] = reg.color ;
+                }
+                if(adress.offset.isGeneralRegister() && adress.offset != null){
+                    NasmRegister reg = (NasmRegister)adress.offset;
+                    if(reg.color != Nasm.REG_UNK
+                            && reg.color != Nasm.REG_ESP
+                            && reg.color !=Nasm.REG_EBP)
+                        couleurs[reg.val] = reg.color ;
+                }
             }
         }
     }
 
 
     public void allocateRegisters(){
+
     }
 
 

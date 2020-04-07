@@ -41,23 +41,25 @@ public class ColorGraph {
     /*-------------------------------------------------------------------------------------------------------------*/
 
     public void selection() {
+        IntSet c = new IntSet(K);
 
+        for(int index = 0 ; index < c.getSize() ; index++){
+            c.add(index);
+        }
 
         while(pile.size() != 0){
             int s = pile.pop();
             IntSet voisins = couleursVoisins(s);
             int counter = 0 ;
+            IntSet cop  = c.copy();
+            IntSet minus = cop.minus(voisins);
+
             for(int index = 0 ; index < voisins.getSize(); index++){
                 if(voisins.isMember(index))
                     counter++ ;
             }
-            if(counter != K){
-
-
-
-                couleur[s] = choisisCouleur(voisins);
-
-
+            if(counter != K && couleur[s]==NOCOLOR){
+                couleur[s] = choisisCouleur(minus);
 
             }
         }
@@ -90,16 +92,9 @@ public class ColorGraph {
     /*-------------------------------------------------------------------------------------------------------------*/
 
     public int choisisCouleur(IntSet voisins) {
-        IntSet c = new IntSet(K);
 
-        for(int index = 0 ; index < c.getSize() ; index++){
-            c.add(index);
-        }
-
-        IntSet cop  = c.minus(voisins).copy();
-
-        for(int index = 0 ; index < cop.getSize() ; index++){
-            if(cop.isMember(index)) {
+        for(int index = 0 ; index < voisins.getSize() ; index++){
+            if(voisins.isMember(index)) {
                 return index ;
             }
         }
@@ -111,7 +106,25 @@ public class ColorGraph {
     /*-------------------------------------------------------------------------------------------------------------*/
 
     public int nbVoisins(int t) {
-        return int2Node[t].outDegree();
+        List<Node> heads = new ArrayList<>();
+        NodeList nodeList = int2Node[t].succ();
+        int count = 0;
+        while(nodeList != null){
+            heads.add(nodeList.head);
+            nodeList = nodeList.tail;
+        }
+
+        for(int i = 0 ; i < int2Node.length; i++){
+            for(Node e : heads){
+                if(e == int2Node[i]){
+                    if(!enleves.isMember(i)){
+                        count++;
+                    }
+                }
+            }
+        }
+
+        return count;
     }
 
     /*-------------------------------------------------------------------------------------------------------------*/
@@ -124,14 +137,21 @@ public class ColorGraph {
     public int simplification() {
 
         boolean modif = true;
-        int n = couleur.length - Collections.frequency(Arrays.asList(couleur),-1);
+        int count = 0;
+        for(int c : couleur){
+            if(c == -1){
+                count++;
+            }
+        }
+        int n = R - (R - count);
 
         while (pile.size() != n && modif ) {
             modif = false;
             for (int index = 0; index < int2Node.length; index++) {
                 if (enleves.isMember(index))
                     continue;
-                if (nbVoisins(index) < K && couleur[index] == NOCOLOR) {
+                final int i = nbVoisins(index);
+                if (i < K && couleur[index] == NOCOLOR) {
                     pile.push(index);
                     enleves.add(index);
                     modif = true ;
@@ -156,7 +176,6 @@ public class ColorGraph {
                     deborde.add(index);
                     enleves.add(index);
                     simplification();
-                    break;
                 }
             }
 
