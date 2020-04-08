@@ -1,3 +1,5 @@
+import c3a.C3aInstParam;
+import c3a.C3aOperand;
 import sa.*;
 import ts.Ts;
 import ts.TsItemFct;
@@ -136,7 +138,14 @@ public class Sa2ts extends SaDepthFirstVisitor<Void> {
         if (FncDoesNotExists(nom)) Throw.exception("This function : " + nom + " does not exists");
         if (nbARgs != tsItemFct.nbArgs)
             Throw.exception("Expected " + tsItemFct.nbArgs + " argument(s) but got " + nbARgs);
-
+        if(node.getArguments() != null){
+            node.getArguments().getTete().accept(this);
+            SaLExp queue = node.getArguments().getQueue();
+            while(queue != null){
+                queue.getTete().accept(this);
+                queue = queue.getQueue();
+            }
+        }
         node.tsItem = tsItemFct;
         defaultOut(node);
 
@@ -152,6 +161,7 @@ public class Sa2ts extends SaDepthFirstVisitor<Void> {
         if (varDoesNotExists(node.getNom(), tsGlobal)) throwVarNotDeclared(node.getNom());
 
         if (tsGlobal.getVar(node.getNom()).taille < 2) Throw.exception("Variable used as a variable");
+        if(node.getIndice() != null ) node.getIndice().accept(this);
         node.tsItem = tsGlobal.getVar(node.getNom());
 
         defaultOut(node);

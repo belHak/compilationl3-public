@@ -224,7 +224,7 @@ public class Sa2c3a extends SaDepthFirstVisitor<C3aOperand> {
 
     @Override
     public C3aOperand visit(SaInstTantQue node) {
-
+        defaultIn(node);
         C3aLabel startLabel = c3a.newAutoLabel();
         c3a.addLabelToNextInst(startLabel);
         C3aLabel checkLabel = c3a.newAutoLabel();
@@ -235,6 +235,7 @@ public class Sa2c3a extends SaDepthFirstVisitor<C3aOperand> {
         if(node.getFaire() != null ) node.getFaire().accept(this);
         c3a.ajouteInst(new C3aInstJump(startLabel,""));
         c3a.addLabelToNextInst(checkLabel);
+        defaultOut(node);
         return null;
     }
 
@@ -357,7 +358,11 @@ public class Sa2c3a extends SaDepthFirstVisitor<C3aOperand> {
 
     @Override
     public C3aOperand visit(SaExpLire node) {
-        return super.visit(node);
+        defaultIn(node);
+        C3aTemp temp = c3a.newTemp();
+        c3a.ajouteInst(new C3aInstRead(temp,""));
+        defaultOut(node);
+        return temp;
     }
 
     @Override
