@@ -1,13 +1,19 @@
 package c3a;
-import java.util.*;
-import java.io.*;
-import ts.*;
+
+import ts.Ts;
+import ts.TsItemFct;
+
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
 
 public class C3aEval implements C3aVisitor <Integer> {
     private C3a c3a;
     private Ts tableGlobale;
     private TsItemFct currentFct;
-    private TsItemFct storeCurrentFct;
     private int[] reg;
     private int[] stack;
     private int[] varGlob;
@@ -21,6 +27,7 @@ public class C3aEval implements C3aVisitor <Integer> {
     private boolean debug;
     private boolean stop;
     private ArrayList<String> programOutput = new ArrayList<String>();
+    private Stack<TsItemFct> stackCurrentFct;
 
     public C3aEval(C3a c3a, Ts tableGlobale){
         debug = false;
@@ -36,6 +43,8 @@ public class C3aEval implements C3aVisitor <Integer> {
         label2index = new HashMap< Integer, Integer>();
         function2index = new HashMap< String, Integer>();
         C3aInst c3aInst = null;
+        stackCurrentFct = new Stack<>();
+
         for(int i = 0; i < c3a.listeInst.size(); i++){
             c3aInst = c3a.listeInst.get(i);
             if(c3aInst.label != null){
@@ -252,7 +261,7 @@ public class C3aEval implements C3aVisitor <Integer> {
         esp++;
         // sauvegarde de l'index de l'instruction a effectuer après l'appel
         push(eip + 1);
-        storeCurrentFct = currentFct;
+        stackCurrentFct.push(currentFct);
         eip = function2index.get(inst.op1.val.identif);
         return null;
     }
@@ -288,7 +297,7 @@ public class C3aEval implements C3aVisitor <Integer> {
             affect(storeReturnValue, rv);
             storeReturnValue = null;
         }
-        currentFct = storeCurrentFct;
+        currentFct = stackCurrentFct.pop();
         esp = esp - nbParam;
         return null;
     }
