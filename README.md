@@ -6,7 +6,7 @@ Binôme :
 Faissoil SAID
 Abdelhakim BELHACHEMI
 
-La grammaire utilisé est celle de Alexis Nasr [lien](https://github.com/alexisnasr/compilationl3-public/blob/master/src/grammaireL_ref.sablecc)
+La grammaire utilisée est celle de Alexis Nasr [lien](https://github.com/alexisnasr/compilationl3-public/blob/master/src/grammaireL_ref.sablecc)
 
 - [x]  Analyse syntaxique
 - [x]  Construction de l'arbre abstrait
